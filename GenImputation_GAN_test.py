@@ -20,7 +20,7 @@ test_X.shape
 
 # returns a compiled model
 from tensorflow.keras.models import load_model
-SCDA = load_model('model/SCDAmygan.h5')
+GAN = load_model('model/mygan.h5')
 
 # hyperparameters
 missing_perc = 0.1
@@ -43,7 +43,7 @@ for i in range(test_X_missing.shape[0]):
     test_X_missing[i, missing_index, :] = [1, 0, 0]
 
     # predict
-    predict_onehot = SCDA.predict(test_X_missing[i:i + 1, :, :])
+    predict_onehot = GAN.predict(test_X_missing[i:i + 1, :, :])
     # only care the missing position
     predict_missing_onehot = predict_onehot[0:1, missing_index, :]
 
