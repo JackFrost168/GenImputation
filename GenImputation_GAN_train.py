@@ -1,102 +1,7 @@
-# import numpy as np
-# import pandas as pd
-# from sklearn.model_selection import train_test_split
-#
-# from tensorflow import keras
-# from tensorflow.keras.models import Sequential
-# from tensorflow.keras.layers import Conv1D, MaxPooling1D, UpSampling1D, Dropout
-# from tensorflow.keras.regularizers import l1
-# from tensorflow.keras.utils import to_categorical
-#
-# #%matplotlib inline
-# from matplotlib import pyplot as plt
-#
-# # specify a seed for repeating the exact dataset splits
-# np.random.seed(seed=28213)
-#
-# input_name = 'data/yeast_genotype_train.txt'
-# df_ori = pd.read_csv(input_name, sep='\t', index_col=0)
-# print(df_ori.shape)
-#
-# # one hot encode
-# df_onehot = to_categorical(df_ori)
-# df_onehot.shape
-#
-# # split df to train and valid
-# train_X, valid_X = train_test_split(df_onehot, test_size=0.2)
-#
-# train_X.shape, valid_X.shape
-#
-# # hyperparameters
-# missing_perc = 0.1
-#
-# # training
-# batch_size = 32
-# lr = 1e-3
-# epochs = 10
-#
-# # conv1D
-# feature_size = train_X.shape[1]
-# inChannel = train_X.shape[2]
-# kr = 1e-4
-# drop_prec = 0.25
-#
-# SCDA = Sequential()
-# # encoder
-# SCDA.add(
-#     Conv1D(32, 5, padding='same', activation='relu', kernel_regularizer=l1(kr), input_shape=(feature_size, inChannel)))
-# SCDA.add(MaxPooling1D(pool_size=2))
-# SCDA.add(Dropout(drop_prec))
-#
-# SCDA.add(Conv1D(64, 5, padding='same', activation='relu', kernel_regularizer=l1(kr)))
-# SCDA.add(MaxPooling1D(pool_size=2))
-# SCDA.add(Dropout(drop_prec))
-#
-# # bridge
-# SCDA.add(Conv1D(128, 5, padding='same', activation='relu', kernel_regularizer=l1(kr)))
-#
-# # decoder
-# SCDA.add(Conv1D(64, 5, padding='same', activation='relu', kernel_regularizer=l1(kr)))
-# SCDA.add(UpSampling1D(2))
-# SCDA.add(Dropout(drop_prec))
-#
-# SCDA.add(Conv1D(32, 5, padding='same', activation='relu', kernel_regularizer=l1(kr)))
-# SCDA.add(UpSampling1D(2))
-# SCDA.add(Dropout(drop_prec))
-#
-# SCDA.add(Conv1D(inChannel, 5, activation='softmax', padding='same'))
-#
-# # compile
-# SCDA.compile(loss='categorical_crossentropy',
-#              optimizer='adam',
-#              metrics=['accuracy'])
-#
-# SCDA.summary()
-#
-# #Generate data
-# Missing_train = train_X
-# for i in range(Missing_train.shape[0]):
-#     missing_size = int(missing_perc * Missing_train.shape[1])
-#     missing_index = np.random.randint(Missing_train.shape[1], size=missing_size)
-#             # missing loci are encoded as [0, 0]
-#     Missing_train[i, missing_index, :] = [1, 0, 0]
-#
-# SCDA_train = SCDA.fit(Missing_train, train_X, epochs=5, batch_size=32, verbose=1)
-# print('done!')
-
-
-
-#import keras
-#from keras import layers
-
 import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
 
-#from tensorflow import keras
-#from tensorflow.keras.models import Sequential
-#from tensorflow.keras.layers import Conv1D, MaxPooling1D, UpSampling1D, Dropout
-#from tensorflow.keras.regularizers import l1
 from tensorflow.keras.utils import to_categorical
 
 from keras.layers import Input, Dense, Conv1D, MaxPooling1D, UpSampling1D, Dropout, LeakyReLU, Flatten
@@ -167,37 +72,12 @@ x = Dropout(drop_prec)(x)
 
 x = Conv1D(3, 5, activation='softmax', padding='same', name='gen_output')(x)
 
-# x = Conv1D(32, 5, padding='same', activation='relu')(generator_input)
-# x = MaxPooling1D(pool_size=2)(x)
-# x = Dropout(drop_prec)(x)
-#
-# x = Conv1D(64, 5, padding='same', activation='relu')(x)
-# x = MaxPooling1D(pool_size=2)(x)
-# x = Dropout(drop_prec)(x)
-#
-# # bridge
-# x = Conv1D(128, 5, padding='same', activation='relu')(x)
-#
-# # decoder
-# x = Conv1D(64, 5, padding='same', activation='relu')(x)
-# x = UpSampling1D(2)(x)
-# x = Dropout(drop_prec)(x)
-#
-# x = Conv1D(32, 5, padding='same', activation='relu')(x)
-# x = UpSampling1D(2)(x)
-# x = Dropout(drop_prec)(x)
-#
-# x = Conv1D(inChannel, 5, activation='softmax', padding='same')(x)
-
-
 generator = Model(generator_input, x)
 print("Generator:")
 generator.summary()
 
 generator_optimizer = optimizers.Adam(lr=8e-5, clipvalue=1.0, decay=1e-8)
 generator.compile(optimizer=generator_optimizer, loss='categorical_crossentropy')
-# In[8]:
-
 
 '''
 discriminator(鉴别器)
@@ -226,15 +106,9 @@ y = Dense(1, activation='sigmoid')(y)
 discriminator = Model(discriminator_input, y)
 discriminator.summary()
 
-# In[11]:
-
-
 # 为了训练稳定，在优化器中使用学习率衰减和梯度限幅（按值）。
 discriminator_optimizer = optimizers.SGD(lr=8e-5, clipvalue=1.0, decay=1e-8)
 discriminator.compile(optimizer=discriminator_optimizer, loss='binary_crossentropy')
-
-# In[16]:
-
 
 '''
 The adversarial network:对抗网络
@@ -258,9 +132,6 @@ gan.compile(optimizer=gan_optimizer, loss='binary_crossentropy')
 
 #gan.compile(optimizer=gan_optimizer,
             #loss={'gen_output': 'categorical_crossentropy', 'gan_output': 'binary_crossentropy'})
-
-# In[19]:
-
 
 '''
   开始训练了。
